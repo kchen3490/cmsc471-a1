@@ -63,6 +63,8 @@ const chosenCategories = [];
 const availableCrimes = [];
 const chosenCrimes = [];
 
+let currentData = [];
+
 let allData = [];
 let xVar,
   yVar,
@@ -92,14 +94,16 @@ function init() {
       category: d["Crime Category"],
       type: d["Primary Type"],
       description: d["Description"],
+      month: d["Month"],
+      year: +d["Year"],
     };
   })
     .then((data) => {
       console.log(data);
       allData = data;
       setupSelector();
-      //updateAxes()
-      //updateVis()
+      updateAxes();
+      updateVis();
       //addLegend()
     })
     .catch((error) => console.error("Error loading data:", error));
@@ -141,12 +145,62 @@ function setupSelector() {
           .append("option")
           .text((d) => d)
           .attr("value", (d) => d);
-      } else if (d3.select(this).property("id" == "crime")) {
+
+        console.log("test");
+      } else if (d3.select(this).property("id") == "crime") {
         d3.select(this)
           .selectAll("option:checked")
           .each(function () {
+            console.log("this.value " + this.value);
             chosenCrimes.push(this.value);
           });
+
+        updateData(chosenCrimes);
+        updateAxes();
+        updateVis();
       }
     });
+}
+
+function updateData(crimes) {
+  let selectedData = allData.filter((d) => crimes.includes(d.type));
+  let extent = d3.extent(selectedData, (d) => d.date);
+  console.log(extent);
+  let timeRange = d3.time.months(extent[0], extent[1]);
+  let hash = {};
+  console.log(timeRange);
+  /**for (const d in selectedData) {
+    for 
+  }**/
+}
+
+function updateAxes() {
+  svg.selectAll(".axis").remove();
+  svg.selectAll(".labels").remove();
+
+  svg.selectAll("points");
+
+  xScale = d3
+    .scaleTime()
+    .domain(d3.extent(currentData, (d) => d.date))
+    .range([0, width]);
+  const xAxis = d3.axisBottom(xScale);
+
+  svg
+    .append("g")
+    .attr("class", "axis")
+    .attr("transform", `translate(0,${height})`) // Position at the bottom
+    .call(xAxis);
+
+  yScale = d3
+    .scaleLinear()
+    .domain([0, d3.max(allData, (d) => d[yVar])])
+    .range([height, 0]);
+  const yAxis = d3.axisLeft(yScale);
+
+  svg.append("g").attr("class", "y-axis").call(yAxis);
+}
+
+function updateVis() {
+  //todo
 }
