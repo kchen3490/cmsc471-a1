@@ -1,19 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assignment 1: Interactive Visualization</title>
+    <title>Crime in Chicago</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
     <div class="container"> <!-- Centers content and sets max width -->
-        <h1>Assignment 1: Interactive Visualization</h1>
+        <h1>Crime in Chicago</h1>
+        After: <select id="start" class="variable"></select>
+        Before: <select id="end" class="variable"></select>
+        Category: <select id="category" class="variable"></select>
+        Crime: <select id="type" class="variable"></select>
         <div id="vis"></div> <!--  Will hold our visualization (SVG) -->
     </div>
-    
+    <div>
+        <pre>Placeholder for the justification part:
+            Include a brief, clear write-up on your webpage:
+
+            A brief introduction to your dataset, background and your chosen variable(s) or subset.
+
+            Rationale for your design decisions. List your implemented interactions. Explain: How did you choose your
+            particular visual encodings and interaction techniques? What alternatives did you consider and how did you
+            arrive at your ultimate choices?
+
+            References to data resources. Be sure to list the data source you used. If your work adapts or builds on
+            existing visualization examples, please cite those as well.
+
+            An overview of your development process. Describe how the work was split among the team members. Include a
+            commentary on the development process, including answers to the following questions: Roughly how much time
+            did you spend developing your application (in people-hours)? What aspects took the most time?
+
+            If any: A brief summary of AI (e.g. ChatGPT, Cursor, Codex) usage.
+        </pre>
+    </div>
+    <hr>
+    <p>Authors: Kai Chen, Andrew Diep, Tony Zheng</p>
+
     <!-- Load D3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="js/script.js"></script>
 </body>
+
 </html>
