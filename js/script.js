@@ -7,8 +7,6 @@ const width = 1000 - margin.left - margin.right;
 const height = 600 - margin.top - margin.bottom;
 
 // Dropdown options
-const categories = ['Public Order', 'Property', 'Violent', 'Other', 'Drug']
-
 const publicOrder = ['WEAPONS VIOLATION', 'LIQUOR LAW VIOLATION', 'PUBLIC PEACE VIOLATION',
                      'INTERFERENCE WITH PUBLIC OFFICER', 'CONCEALED CARRY LICENSE VIOLATION',
                      'PROSTITUTION', 'OBSCENITY', 'PUBLIC INDECENCY', 'GAMBLING', 'RITUALISM']
@@ -23,6 +21,13 @@ const violent = ['BATTERY', 'ASSAULT', 'CRIMINAL SEXUAL ASSAULT', 'SEX OFFENSE',
 const drug = ['NARCOTICS', 'OTHER NARCOTIC VIOLATION']
 
 const other = ['OTHER OFFENSE', 'NON-CRIMINAL']
+
+const all = [...publicOrder, ...property, ...violent, ...drug, ...other]
+
+const categories = {'Public Order':publicOrder, 'Property':property, 'Violent':violent, 'Other':other, 'Drug':drug}
+
+const chosenValues = [];
+const availableCrimes = [];
 
 let allData = []
 let xVar, yVar, sizeVar, targetYear = 2000
@@ -56,6 +61,55 @@ function init(){
     .then(data => {
             console.log(data)
             allData = data
+            setupSelector()
+            //updateAxes()
+            //updateVis()
+            //addLegend()
         })
     .catch(error => console.error('Error loading data:', error));
 }
+
+function setupSelector() {
+    d3.select('#category')
+        .attr("multiple", "")
+        .selectAll('myOptions')
+        .data(Object.keys(categories))
+        .enter()
+        .append('option')
+        .text(d => d)
+        .attr("value", d => d)
+    
+    d3.select('#crime')
+        .attr("multiple", "")
+
+    d3.selectAll('.variable')
+        .each(function() {
+        })
+        .on("change", function (event) {
+            chosenValues.length = 0;
+            availableCrimes.length = 0;
+            if (d3.select(this).property("id") == "category") {
+              d3.select(this)
+                .selectAll("option:checked")
+                .each(function () {
+                  chosenValues.push(this.value)
+                })
+              for (const chosen of chosenValues){
+                for (const crime of categories[chosen])
+                availableCrimes.push(crime)
+              }
+              d3.select('#crime')
+                .selectAll('option')
+                .remove();
+              
+              d3.select('#crime')
+                .selectAll('myOptions')
+                .data(availableCrimes)
+                .enter()
+                .append('option')
+                .text(d => d)
+                .attr("value", d => d)
+            }
+        })
+}
+
