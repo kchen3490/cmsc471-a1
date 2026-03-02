@@ -70,15 +70,11 @@ let timeRange;
 let plotAll;
 
 let allData = [];
-let xVar,
-  yVar,
-  sizeVar,
-  targetYear = 2000;
-let xScale, yScale, sizeScale;
+let xScale, yScale;
 
 window.addEventListener("load", init);
 
-// date format
+// date format UNUSED
 var format = d3.timeParse("%m/%d/%Y %I:%M:%S %p");
 
 // Create SVG and g
