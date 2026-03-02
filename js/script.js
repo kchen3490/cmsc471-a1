@@ -63,8 +63,11 @@ const chosenCategories = [];
 const availableCrimes = [];
 const chosenCrimes = [];
 
-let currentData = [];
+// plotData will be a list objects. each object hold key:value pairs
+// each object has the form {date: month, count: int}
+let plotData;
 let timeRange;
+let plotAll;
 
 let allData = [];
 let xVar,
@@ -102,12 +105,16 @@ function init() {
     .then((data) => {
       console.log(data);
       allData = data;
+      plotAll = updateData(all);
+      plotData = plotAll;
       setupSelector();
       updateAxes();
       updateVis();
       //addLegend()
     })
     .catch((error) => console.error("Error loading data:", error));
+
+  plotAll = updateData(all);
 }
 
 function setupSelector() {
@@ -123,7 +130,7 @@ function setupSelector() {
   d3.select("#crime").attr("multiple", "");
 
   d3.selectAll(".variable")
-    .each(function () {})
+    .each(function () { })
     .on("change", function (event) {
       chosenCategories.length = 0;
       availableCrimes.length = 0;
@@ -153,7 +160,7 @@ function setupSelector() {
             chosenCrimes.push(this.value);
           });
 
-        updateData(chosenCrimes);
+        plotData = updateData(chosenCrimes);
         updateAxes();
         updateVis();
       }
@@ -169,18 +176,20 @@ function updateData(crimes) {
   // these are the y values (months) that will be plotted
   timeRange = d3.timeMonths(extent[0], extent[1]);
   // each month of the year represents a bin and we count how many entries in each bin
-  let bins = {};
+  let bins = [];
   // for each month, count how many crimes occurred
   for (let i = 0; i < timeRange.length; i++) {
     let monthData;
     // filter by month
     if (i < timeRange.length - 1) {
-      monthData = selectedData.filter(d => (d.date >= timeRange[i] && d.date <= timeRange[i+1]))
+      monthData = selectedData.filter(
+        (d) => d.date >= timeRange[i] && d.date <= timeRange[i + 1],
+      );
     } else {
-      monthData = selectedData.filter(d => d.date >= timeRange[i])
+      monthData = selectedData.filter((d) => d.date >= timeRange[i]);
     }
     // store the total number of occurrences in the month
-    bins[timeRange[i]] = monthData.length
+    bins.push({ date: timeRange[i], count: monthData.length });
   }
   return bins; // this will be the y value plotted
 }
@@ -188,12 +197,8 @@ function updateData(crimes) {
 function updateAxes() {
   svg.selectAll(".axis").remove();
   svg.selectAll(".labels").remove();
-
-  svg.selectAll("points");
-
-  xScale = d3
-    .scaleTime()
-    .domain(d3.extent(currentData, (d) => d.date))
+  xScale = d3.scaleTime()
+    .domain(d3.extent(plotData, (d) => d.date))
     .range([0, width]);
   const xAxis = d3.axisBottom(xScale);
 
@@ -203,9 +208,8 @@ function updateAxes() {
     .attr("transform", `translate(0,${height})`) // Position at the bottom
     .call(xAxis);
 
-  yScale = d3
-    .scaleLinear()
-    .domain([0, d3.max(allData, (d) => d[yVar])])
+  yScale = d3.scaleLinear()
+    .domain([0, d3.max(plotAll, (d) => d.count)])
     .range([height, 0]);
   const yAxis = d3.axisLeft(yScale);
 
@@ -213,5 +217,13 @@ function updateAxes() {
 }
 
 function updateVis() {
-  //todo
+  console.log(plotData)
+  svg.append("path")
+    .datum(plotData)
+    .attr("fill", "none")
+    .attr("stroke", "steelblue")
+    .attr("stroke-width", 1.5)
+    .attr("d", d3.line()
+      .x(d => xScale(d.date))
+      .y(d => yScale(d.count)))
 }
