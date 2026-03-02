@@ -64,6 +64,7 @@ const availableCrimes = [];
 const chosenCrimes = [];
 
 let currentData = [];
+let timeRange;
 
 let allData = [];
 let xVar,
@@ -145,13 +146,10 @@ function setupSelector() {
           .append("option")
           .text((d) => d)
           .attr("value", (d) => d);
-
-        console.log("test");
       } else if (d3.select(this).property("id") == "crime") {
         d3.select(this)
           .selectAll("option:checked")
           .each(function () {
-            console.log("this.value " + this.value);
             chosenCrimes.push(this.value);
           });
 
@@ -162,16 +160,29 @@ function setupSelector() {
     });
 }
 
+// function to calculate y value of each time interval
 function updateData(crimes) {
+  // filter by the crimes we selected
   let selectedData = allData.filter((d) => crimes.includes(d.type));
+  // variable which holds the min and max of the date range
   let extent = d3.extent(selectedData, (d) => d.date);
-  console.log(extent);
-  let timeRange = d3.timeMonths(extent[0], extent[1]);
-  let hash = {};
-  console.log(timeRange);
-  /**for (const d in selectedData) {
-    for 
-  }**/
+  // these are the y values (months) that will be plotted
+  timeRange = d3.timeMonths(extent[0], extent[1]);
+  // each month of the year represents a bin and we count how many entries in each bin
+  let bins = {};
+  // for each month, count how many crimes occurred
+  for (let i = 0; i < timeRange.length; i++) {
+    let monthData;
+    // filter by month
+    if (i < timeRange.length - 1) {
+      monthData = selectedData.filter(d => (d.date >= timeRange[i] && d.date <= timeRange[i+1]))
+    } else {
+      monthData = selectedData.filter(d => d.date >= timeRange[i])
+    }
+    // store the total number of occurrences in the month
+    bins[timeRange[i]] = monthData.length
+  }
+  return bins; // this will be the y value plotted
 }
 
 function updateAxes() {
