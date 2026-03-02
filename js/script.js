@@ -193,6 +193,8 @@ function updateData(crimes) {
 function updateAxes() {
   svg.selectAll(".axis").remove();
   svg.selectAll(".labels").remove();
+  svg.selectAll(".y-axis").remove();
+
   xScale = d3.scaleTime()
     .domain(d3.extent(plotData, (d) => d.date))
     .range([0, width]);
@@ -205,7 +207,7 @@ function updateAxes() {
     .call(xAxis);
 
   yScale = d3.scaleLinear()
-    .domain([0, d3.max(plotAll, (d) => d.count)])
+    .domain([0, d3.max(plotData, (d) => d.count)])
     .range([height, 0]);
   const yAxis = d3.axisLeft(yScale);
 
@@ -213,7 +215,8 @@ function updateAxes() {
 }
 
 function updateVis() {
-  console.log(plotData)
+  svg.selectAll("path").remove();
+
   svg.append("path")
     .datum(plotData)
     .attr("fill", "none")
