@@ -166,7 +166,7 @@ function updateData(crimes) {
   let selectedData = allData.filter((d) => crimes.includes(d.type));
   let extent = d3.extent(selectedData, (d) => d.date);
   console.log(extent);
-  let timeRange = d3.time.months(extent[0], extent[1]);
+  let timeRange = d3.timeMonths(extent[0], extent[1]);
   let hash = {};
   console.log(timeRange);
   /**for (const d in selectedData) {
