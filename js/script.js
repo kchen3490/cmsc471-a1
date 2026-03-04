@@ -70,6 +70,7 @@ let timeRange;
 let plotAll;
 
 let allData = [];
+let xVar = "month", yVar = "count";
 let xScale, yScale;
 
 window.addEventListener("load", init);
@@ -200,8 +201,7 @@ function updateAxes() {
     .range([0, width]);
   const xAxis = d3.axisBottom(xScale);
 
-  svg
-    .append("g")
+  svg.append("g")
     .attr("class", "axis")
     .attr("transform", `translate(0,${height})`) // Position at the bottom
     .call(xAxis);
@@ -211,7 +211,26 @@ function updateAxes() {
     .range([height, 0]);
   const yAxis = d3.axisLeft(yScale);
 
-  svg.append("g").attr("class", "y-axis").call(yAxis);
+  svg.append("g")
+    .attr("class", "y-axis")
+    .call(yAxis);
+  
+  // Add x-axis label
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height + margin.bottom - 5)
+    .attr("text-anchor", "middle")
+    .text(xVar) // Displays the current x-axis variable
+    .attr('class', 'labels');
+
+  // Add y-axis label
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -margin.left + 15)
+    .attr("text-anchor", "middle")
+    .text(yVar) // Displays the current y-axis variable
+    .attr('class', 'labels');
 }
 
 function updateVis() {
