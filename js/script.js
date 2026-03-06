@@ -89,7 +89,7 @@ const svg = d3
 
 // Load csv data
 function init() {
-  d3.csv("./data/Chicago_Crimes_2019_to_2022.csv", function (d) {
+  d3.csv("./data/Chicago_Crimes_20200311_to_20200318.csv", function (d) {
     return {
       date: format(d["Date"]),
       category: d["Crime Category"],
@@ -171,7 +171,7 @@ function updateData(crimes) {
   // variable which holds the min and max of the date range
   let extent = d3.extent(selectedData, (d) => d.date);
   // these are the y values (months) that will be plotted
-  timeRange = d3.timeMonths(extent[0], extent[1]);
+  timeRange = d3.timeDays(extent[0], d3.timeDay.offset(extent[1], 1));
   // each month of the year represents a bin and we count how many entries in each bin
   let bins = [];
   // for each month, count how many crimes occurred
