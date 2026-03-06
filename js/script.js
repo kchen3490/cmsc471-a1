@@ -176,17 +176,26 @@ function updateData(crimes) {
   let bins = [];
   // for each month, count how many crimes occurred
   for (let i = 0; i < timeRange.length; i++) {
-    let monthData;
+    let dayData;
     // filter by month
     if (i < timeRange.length - 1) {
-      monthData = selectedData.filter(
+      dayData = selectedData.filter(
         (d) => d.date >= timeRange[i] && d.date <= timeRange[i + 1],
       );
     } else {
-      monthData = selectedData.filter((d) => d.date >= timeRange[i]);
+      dayData = selectedData.filter((d) => d.date >= timeRange[i]);
     }
+
+    let counts = d3.rollup(dayData, v => v.length, d => d.description);
+
+    let topDesc = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+
     // store the total number of occurrences in the month
-    bins.push({ date: timeRange[i], count: monthData.length });
+    bins.push({ 
+      date: timeRange[i], 
+      count: dayData.length,
+      topDescription: topDesc
+    });
   }
   return bins; // this will be the y value plotted
 }
@@ -235,6 +244,7 @@ function updateAxes() {
 
 function updateVis() {
   svg.selectAll("path").remove();
+  svg.selectAll(".hover-point").remove();
 
   svg.append("path")
     .datum(plotData)
@@ -244,4 +254,30 @@ function updateVis() {
     .attr("d", d3.line()
       .x(d => xScale(d.date))
       .y(d => yScale(d.count)))
+  
+  svg.selectAll(".hover-point")
+    .data(plotData, d => d.date)
+    .enter()
+    .append("circle")
+    .attr("class", "hover-point")
+    .attr("cx", d => xScale(d.date))
+    .attr("cy", d => yScale(d.count))
+    .attr("r", 10)
+    .attr("fill", "transparent")
+    .on("mouseover", function(event, d) {
+      d3.select(this)
+        .style("stroke", "black")
+        .attr("fill", "orange").attr("r", 10);
+      d3.select("#tooltip").style("display", "block")
+        .html(
+          `<strong>${d.date.toDateString()}</strong><br/>
+          Count: ${d.count}<br/>
+          Top Description: ${d.topDescription}`)
+        .style("left", (event.pageX + 10) + "px")
+        .style("top", (event.pageY - 10) + "px");
+    })
+    .on("mouseout", function() {
+      d3.select(this).style("stroke", "none").attr("fill", "transparent").attr("r", 10);
+      d3.select("#tooltip").style("display", "none");
+    });
 }
