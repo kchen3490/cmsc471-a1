@@ -70,6 +70,8 @@ let timeRange;
 let plotAll;
 
 let allData = [];
+let currentRange = [];
+let sliderRange;
 let xVar = "day", yVar = "count";
 let xScale, yScale;
 
@@ -89,7 +91,7 @@ const svg = d3
 
 // Load csv data
 function init() {
-  d3.csv("./data/Chicago_Crimes_Mar_to_Apr_2020.csv", function (d) {
+  d3.csv("./data/Chicago_Crimes_All_March_2020.csv", function (d) {
     return {
       date: format(d["Date"]),
       category: d["Crime Category"],
@@ -102,6 +104,7 @@ function init() {
     .then((data) => {
       console.log(data);
       allData = data;
+      currentRange = d3.extent(allData, (d) => d.date);
       plotAll = updateData(all);
       plotData = plotAll;
       setupSelector();
@@ -115,6 +118,31 @@ function init() {
 }
 
 function setupSelector() {
+  // Get the absolute min and max dates from your data
+  const dateExtent = d3.extent(allData, d => d.date);
+
+  const sliderRange = d3
+      .sliderBottom() // sliderBottom looks better below headers
+      .min(dateExtent[0])
+      .max(dateExtent[1])
+      .width(width - 40) 
+      .tickFormat(d3.timeFormat('%b %d'))
+      .ticks(d3.timeDay.every(3))
+      .default([dateExtent[0], dateExtent[1]]) // Start with full range selected
+      .fill('#2196f3')
+      .on('onchange', val => {
+          // val is an array: [startDate, endDate]
+          updateFilteredVis(val[0], val[1]);
+      });
+
+  d3.select('#slider')
+    .append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', 100)
+    .append('g')
+    .attr('transform', `translate(${margin.left},30)`)
+    .call(sliderRange);
+
   d3.select("#category")
     .attr("multiple", "")
     .selectAll("myOptions")
@@ -168,16 +196,14 @@ function setupSelector() {
 function updateData(crimes) {
   // filter by the crimes we selected
   let selectedData = allData.filter((d) => crimes.includes(d.type));
-  if (selectedData.length === 0) return [];
 
-  // variable which holds the min and max of the date range
-  let extent = d3.extent(selectedData, (d) => d.date);
-  
-  let startDate = d3.timeDay.floor(extent[0]);
-  let endDate = d3.timeDay.floor(extent[1]);
+  const [startBound, endBound] = currentRange;
+
+  const finalStart = d3.timeDay.floor(startBound);
+  const finalEnd = d3.timeDay.ceil(endBound);
   
   // these are the x values (days) that will be plotted
-  timeRange = d3.timeDays(startDate, d3.timeDay.offset(endDate, 1));
+  let timeRange = d3.timeDays(finalStart, finalEnd);
   // each day represents a bin and we count how many entries in each bin
   let bins = [];
   // for each day, count how many crimes occurred
@@ -314,4 +340,15 @@ function updateVis() {
       d3.select(this).style("stroke", "none").attr("fill", "transparent").attr("r", 10);
       d3.select("#tooltip").style("display", "none");
     });
+}
+
+function updateFilteredVis(startDate, endDate) {
+    currentRange = [startDate, endDate];
+    
+    // Determine which crimes to show (if none selected, show 'all')
+    const crimesToFilter = chosenCrimes.length > 0 ? chosenCrimes : all;
+    
+    plotData = updateData(crimesToFilter);
+    updateAxes();
+    updateVis();
 }

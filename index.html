@@ -11,8 +11,9 @@
 <body>
     <div class="container">
         <h1>Crime in Chicago</h1>
-        After: <select id="start" class="time"></select>
-        Before: <select id="end" class="time"></select>
+        <!-- After: <select id="start" class="time"></select> -->
+        <!-- Before: <select id="end" class="time"></select> -->
+        <div id="slider"></div>
         Category: <select id="category" class="variable"></select>
         Crime: <select id="crime" class="variable"></select>
         <div id="vis"></div>
@@ -45,6 +46,7 @@
 
     <!-- Load D3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/d3-simple-slider"></script>
     <script src="js/script.js"></script>
 </body>
 
