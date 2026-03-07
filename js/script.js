@@ -89,7 +89,7 @@ const svg = d3
 
 // Load csv data
 function init() {
-  d3.csv("./data/Chicago_Crimes_20200311_to_20200318.csv", function (d) {
+  d3.csv("./data/Chicago_Crimes_Mar_to_Apr_2020.csv", function (d) {
     return {
       date: format(d["Date"]),
       category: d["Crime Category"],
@@ -168,23 +168,26 @@ function setupSelector() {
 function updateData(crimes) {
   // filter by the crimes we selected
   let selectedData = allData.filter((d) => crimes.includes(d.type));
+  if (selectedData.length === 0) return [];
+
   // variable which holds the min and max of the date range
   let extent = d3.extent(selectedData, (d) => d.date);
-  // these are the y values (months) that will be plotted
-  timeRange = d3.timeDays(extent[0], d3.timeDay.offset(extent[1], 1));
-  // each month of the year represents a bin and we count how many entries in each bin
+  
+  let startDate = d3.timeDay.floor(extent[0]);
+  let endDate = d3.timeDay.floor(extent[1]);
+  
+  // these are the x values (days) that will be plotted
+  timeRange = d3.timeDays(startDate, d3.timeDay.offset(endDate, 1));
+  // each day represents a bin and we count how many entries in each bin
   let bins = [];
-  // for each month, count how many crimes occurred
+  // for each day, count how many crimes occurred
   for (let i = 0; i < timeRange.length; i++) {
-    let dayData;
-    // filter by month
-    if (i < timeRange.length - 1) {
-      dayData = selectedData.filter(
-        (d) => d.date >= timeRange[i] && d.date <= timeRange[i + 1],
-      );
-    } else {
-      dayData = selectedData.filter((d) => d.date >= timeRange[i]);
-    }
+    let currentDay = timeRange[i];
+    let nextDay = d3.timeDay.offset(currentDay, 1);
+    
+    let dayData = selectedData.filter(
+      (d) => d.date >= currentDay && d.date < nextDay,
+    );
 
     let counts = d3.rollup(dayData, v => v.length, d => d.description);
 
@@ -205,12 +208,37 @@ function updateAxes() {
   svg.selectAll(".labels").remove();
   svg.selectAll(".y-axis").remove();
 
+  const dateExtent = d3.extent(plotData, (d) => d.date);
+
   xScale = d3.scaleTime()
-    .domain(d3.extent(plotData, (d) => d.date))
+    .domain(dateExtent)
     .range([0, width]);
-  const xAxis = d3.axisBottom(xScale)
-    .ticks(d3.timeDay.every(1))
-    .tickFormat(d3.timeFormat("%b %d")); // Format ticks as "Month Day"
+  
+  const numDays = plotData.length; // The number of data points we have
+  let xAxis = d3.axisBottom(xScale).tickFormat(d3.timeFormat("%b %d"));
+
+  // 2. Dynamic Scaling Logic
+  if (numDays <= 12) {
+    // For small ranges (up to ~1.5 weeks), show every single day
+    xAxis.ticks(d3.timeDay.every(1));
+  } else {
+    // For "weird" or long ranges, manually pick the points to ensure
+    // the start and end dates are included.
+    const desiredTicks = 7; // Adjust this for how crowded you want it
+    const tickValues = [];
+    
+    // Calculate the step size to pick indices evenly
+    const step = (numDays - 1) / (desiredTicks - 1);
+    
+    for (let i = 0; i < desiredTicks; i++) {
+      // Round to nearest index to get the actual data point
+      const index = Math.round(i * step);
+      tickValues.push(plotData[index].date);
+    }
+    
+    // 3. Force these specific dates
+    xAxis.tickValues(tickValues);
+  }
 
   svg.append("g")
     .attr("class", "axis")
