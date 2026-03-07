@@ -70,7 +70,7 @@ let timeRange;
 let plotAll;
 
 let allData = [];
-let xVar = "month", yVar = "count";
+let xVar = "day", yVar = "count";
 let xScale, yScale;
 
 window.addEventListener("load", init);
@@ -208,7 +208,9 @@ function updateAxes() {
   xScale = d3.scaleTime()
     .domain(d3.extent(plotData, (d) => d.date))
     .range([0, width]);
-  const xAxis = d3.axisBottom(xScale);
+  const xAxis = d3.axisBottom(xScale)
+    .ticks(d3.timeDay.every(1))
+    .tickFormat(d3.timeFormat("%b %d")); // Format ticks as "Month Day"
 
   svg.append("g")
     .attr("class", "axis")
@@ -218,7 +220,11 @@ function updateAxes() {
   yScale = d3.scaleLinear()
     .domain([0, d3.max(plotData, (d) => d.count)])
     .range([height, 0]);
-  const yAxis = d3.axisLeft(yScale);
+
+  const maxCount = d3.max(plotData, (d) => d.count);  
+  const yAxis = d3.axisLeft(yScale)
+    .ticks(Math.min(maxCount, 10))
+    .tickFormat(d3.format("d"));
 
   svg.append("g")
     .attr("class", "y-axis")
