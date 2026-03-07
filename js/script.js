@@ -72,7 +72,7 @@ let plotAll;
 let allData = [];
 let currentRange = [];
 let sliderRange;
-let xVar = "day", yVar = "count";
+let xVar = "day", yVar = "number of crimes";
 let xScale, yScale;
 
 window.addEventListener("load", init);
@@ -131,11 +131,9 @@ function setupSelector() {
       .default([dateExtent[0], dateExtent[1]]) // Start with full range selected
       .fill('#2196f3')
       .on('onchange', val => {
-          // 1. Force handles to the beginning of the day
           let start = d3.timeDay.floor(val[0]);
           let end = d3.timeDay.floor(val[1]);
 
-          // 2. Enforce the 2-day minimum (Distance of 1 day between handles)
           if (d3.timeDay.count(start, end) < 1) {
               const absoluteMax = d3.timeDay.floor(d3.extent(allData, d => d.date)[1]);
               
@@ -148,7 +146,6 @@ function setupSelector() {
               sliderRange.value([start, end]);
           }
 
-          // 3. Send the updated range to the trigger
           updateFilteredVis(start, end);
       });
 
@@ -218,9 +215,9 @@ function updateData(crimes) {
   
   // these are the x values (days) that will be plotted
   let timeRange = d3.timeDays(
-        d3.timeDay.floor(startBound), 
-        d3.timeDay.offset(d3.timeDay.floor(endBound), 1) 
-    );
+      d3.timeDay.floor(startBound), 
+      d3.timeDay.offset(d3.timeDay.floor(endBound), 1) 
+  );
   // each day represents a bin and we count how many entries in each bin
   let bins = [];
   // for each day, count how many crimes occurred
@@ -288,13 +285,15 @@ function updateAxes() {
     .attr("transform", `translate(0,${height})`) // Position at the bottom
     .call(xAxis);
 
+  const actualMax = d3.max(plotData, (d) => d.count);
+  const yMax = actualMax > 0 ? actualMax : 10;
+
   yScale = d3.scaleLinear()
-    .domain([0, d3.max(plotData, (d) => d.count)])
+    .domain([0, yMax])
     .range([height, 0]);
 
-  const maxCount = d3.max(plotData, (d) => d.count);  
   const yAxis = d3.axisLeft(yScale)
-    .ticks(Math.min(maxCount, 10))
+    .ticks(Math.min(yMax, 10))
     .tickFormat(d3.format("d"));
 
   svg.append("g")
@@ -322,6 +321,7 @@ function updateAxes() {
 function updateVis() {
   svg.selectAll("path").remove();
   svg.selectAll(".hover-point").remove();
+  svg.selectAll(".no-data-text").remove();
 
   svg.append("path")
     .datum(plotData)
@@ -357,6 +357,18 @@ function updateVis() {
       d3.select(this).style("stroke", "none").attr("fill", "transparent").attr("r", 10);
       d3.select("#tooltip").style("display", "none");
     });
+
+    const totalCrimes = d3.sum(plotData, d => d.count);
+    if (totalCrimes === 0) {
+    svg.append("text")
+      .attr("class", "no-data-text")
+      .attr("x", width / 2)
+      .attr("y", height / 2)
+      .attr("text-anchor", "middle")
+      .style("font-style", "italic")
+      .style("fill", "#888")
+      .text("No incidents reported for this selection");
+  }
 }
 
 function updateFilteredVis(startDate, endDate) {
