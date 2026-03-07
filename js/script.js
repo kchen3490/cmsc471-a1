@@ -131,8 +131,25 @@ function setupSelector() {
       .default([dateExtent[0], dateExtent[1]]) // Start with full range selected
       .fill('#2196f3')
       .on('onchange', val => {
-          // val is an array: [startDate, endDate]
-          updateFilteredVis(val[0], val[1]);
+          // 1. Force handles to the beginning of the day
+          let start = d3.timeDay.floor(val[0]);
+          let end = d3.timeDay.floor(val[1]);
+
+          // 2. Enforce the 2-day minimum (Distance of 1 day between handles)
+          if (d3.timeDay.count(start, end) < 1) {
+              const absoluteMax = d3.timeDay.floor(d3.extent(allData, d => d.date)[1]);
+              
+              if (end < absoluteMax) {
+                  end = d3.timeDay.offset(start, 1);
+              } else {
+                  start = d3.timeDay.offset(end, -1);
+              }
+              // Sync the slider handles visually
+              sliderRange.value([start, end]);
+          }
+
+          // 3. Send the updated range to the trigger
+          updateFilteredVis(start, end);
       });
 
   d3.select('#slider')
@@ -198,12 +215,12 @@ function updateData(crimes) {
   let selectedData = allData.filter((d) => crimes.includes(d.type));
 
   const [startBound, endBound] = currentRange;
-
-  const finalStart = d3.timeDay.floor(startBound);
-  const finalEnd = d3.timeDay.ceil(endBound);
   
   // these are the x values (days) that will be plotted
-  let timeRange = d3.timeDays(finalStart, finalEnd);
+  let timeRange = d3.timeDays(
+        d3.timeDay.floor(startBound), 
+        d3.timeDay.offset(d3.timeDay.floor(endBound), 1) 
+    );
   // each day represents a bin and we count how many entries in each bin
   let bins = [];
   // for each day, count how many crimes occurred
