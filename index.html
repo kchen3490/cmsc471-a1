@@ -21,16 +21,23 @@
 
     <div id="tooltip" style="display:none"></div>
 
-    <div>
-        <pre>Write-Up:
+    <p>
+        Write-Up:
+    </p>
+    <div id="writeup">
+        <p>
             For this assignment, we chose to analyze the Chicago Crimes dataset. This dataset covers the reported incidents of crime in Chicago, Illinois from 2001 to the present day (except the seven most recent days). 
             Data was extracted from the Chicago Police Department’s CLEAR (Citizen Law Enforcement Analysis and Reporting) system. 
-
+        </p>
+        <br>
+        <p>
             We decided that the subset of the Chicago Crimes dataset should range from March 1, 2020 to March 31, 2020. 
             The reason that March 2020 is notable is because this is the time where the World Health Organization (WHO) declared COVID-19 as a pandemic (March 11, 2020), and public schools officially closed to prevent the spread of the coronavirus (March 13, 2020). 
             We chose to focus on the Date, Primary Type, and Description variables because we wanted to understand what the most frequent types of crimes surrounding the COVID-19 pandemic were, as well as any extra details about the crime (for instance, if firearms were involved). 
             In addition, the intent was to see if these announcements led to an increase in crime count or certain types of crimes. 
-
+        </p>
+        <br>
+        <p>
             For Category 1, we chose to implement “Dynamic filters or queries” by creating dropdowns for a crime category (Public Order, Property, Violent, Drug, Other) and a specific crime type. 
             This allows the user to perform a dynamic query on the March 2020 subset and examine the frequency of a specific crime, such as Motor Vehicle Theft. 
             We wanted the user to have an easier time narrowing down the vast amount of information, so they could focus on viewing the trajectory for one crime at a time. 
@@ -41,27 +48,40 @@
             Another interaction we implemented was “Panning and/or zooming” through the slider above the visualization. 
             This allows the user to zoom into a specific time window in March by modifying the start and end dates on the slider. 
             We decided on this because it could help the user if they specifically wanted to focus on dates before public schools were closed, after WHO classified COVID-19 as a pandemic, etc.
-
+        </p>
+        <br>
+        <p>
             Our work took some inspiration from Labs 4-5. In particular, we liked how the slider would dynamically modify the graph to adhere to the dates chosen, so we used the same d3-simple-slider.
-
-            Initially, we split up the work as follows: Andy parsed the dataset, Tony created a basic visualization with D3 along with the crime dropdowns, and Kai set up the GitHub repo with a skeleton for the code. 
-
+        </p>
+        <br>
+        <p>
+            Initially, we split up the work as follows: Kai set up the GitHub repo with a skeleton for the code, Andy parsed the dataset, and Tony created a basic visualization with D3 along with the crime dropdowns. 
+        </p>
+        <br>
+        <p>
             Originally, we started with a subset from January 2019 to December 2022. 
             Andy separated the date into month, day, year, day of week, and hour, in order to potentially analyze which day of the week crimes were most common, and whether crimes were most frequent in the morning, afternoon, or evening. 
             He also decided to add a column for the Crime Category. Since there were several crime types, it became easier to organize them into five types, those being Property, Violent, Public Order, Drug, and Other. In total, this took about 1 hour.
-
+        </p>
+        <br>
+        <p>
             Then, Tony used this updated dataset to create a basic visualization using D3. This was a line graph that included a dropdown for the user to select a Crime Category. 
             When a Crime Category was chosen, that would populate another dropdown for the user to choose a specific crime. 
             He also tried to create dropdowns so the user could choose start and end dates for the graph to display. 
             In total, this took about 7 hours (because Tony decided to avoid using AI, props to him!). 
-
+        </p>
+        <br>
+        <p>
             Later on, Andy made some improvements to the visualization. This included small tweaks, like adding labels to the axes and handling edge cases with types of crimes that didn’t occur. 
             There were also some bigger changes, like changing the current dataset to be an even smaller subset so the visualization wouldn’t take as long to load (January 2019 to December 2022 → March 11, 2020 to March 18, 2020). 
             Eventually, he settled on March 1, 2020 to March 31, 2020. He also added a tooltip on hover to display the exact count and most frequent crime description, and a slider as a more intuitive method to modify the dates to display on the graph. In total, this took about 5 hours with some Gemini usage. 
-
+        </p>
+        <br>
+        <p>
             Regarding AI usage, we mostly used Gemini with the purpose of debugging code. 
             This stemmed from trying to follow the tooltip and slider examples from Labs 4-5, but running into errors like the tooltip appearing in the wrong place, or the slider not aligning with the days displayed on the graph (for instance, end date on slider says March 31, but the graph end date was March 30). 
-        </pre>
+        </p>
+        <br>
     </div>
     <hr>
     <p>Authors: Kai Chen, Andrew Diep, Tony Zheng</p>

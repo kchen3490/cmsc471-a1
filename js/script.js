@@ -158,7 +158,7 @@ function setupSelector() {
     .call(sliderRange);
 
   d3.select("#category")
-    .attr("multiple", "") // TODO: do we need the multiple? Otherwise, we lead users to believe selecting multiple files will work
+    .attr("multiple", "")
     .selectAll("myOptions")
     .data(Object.keys(categories))
     .enter()
@@ -166,7 +166,7 @@ function setupSelector() {
     .text((d) => d)
     .attr("value", (d) => d);
 
-  d3.select("#crime").attr("multiple", ""); // TODO: do we need the multiple? Otherwise, we lead users to believe selecting multiple files will work
+  d3.select("#crime").attr("multiple", "");
 
   d3.selectAll(".variable")
     .each(function () { })

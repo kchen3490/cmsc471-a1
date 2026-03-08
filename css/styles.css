@@ -31,6 +31,13 @@ body {
     font-size: 12px;
 }
 
+#writeup {
+    padding: 10px;
+    margin-left: 1.5rem;
+    max-width: 1000px; /* just a little wider than the svg above */
+    /* border: 1px solid black; */ /* for debugging to see the border */
+}
+
 /* Styling axes with CSS */
 .x-axis path,
 .y-axis path,
